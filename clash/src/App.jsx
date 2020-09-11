@@ -1,12 +1,12 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
-import Navbar from './components/Navbar.js'
+import Navbar from './components/navbar/Navbar.js'
 
 function App() {
   return (
     <div>
       <Navbar />
-      <Button>Click me</Button>
+      <Button color="primary">Click me</Button>
     </div>
   );
 }
