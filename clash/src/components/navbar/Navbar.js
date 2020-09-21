@@ -11,10 +11,10 @@ const Navbar = () => {
       <AppBar position="sticky" color="primary">
         <Toolbar className="toolbar">
           <a className="logo" href="#">
-            <img src={logo} height="80px" alt="Clash LoL" />
+            <img src={logo} height="70px" alt="Clash LoL" />
           </a>
-          <Typography variant="h4" className="cl1">CLASH</Typography>
-          <Typography variant="h4" className="cl2">TEAM</Typography>
+          <Typography variant="h5" className="cl1">CLASH</Typography>
+          <Typography variant="h5" className="cl2">TEAM</Typography>
         </Toolbar>
       </AppBar>
     </div>
