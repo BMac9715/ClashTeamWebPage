@@ -72,7 +72,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
       color: theme.palette.common.white,
     },
   }));
-
+ 
 const TeamsMain = () => {
 
     const classes = useStyles();

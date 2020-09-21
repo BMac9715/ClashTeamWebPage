@@ -122,7 +122,7 @@ const Ranked = (params) => {
 const Profile = () => {
     const classes = useStyles();
 
-    var profileIcon = "http://ddragon.leagueoflegends.com/cdn/10.18.1/img/passive/Anivia_P.png";
+    var profileIcon = "http://ddragon.leagueoflegends.com/cdn/10.19.1/img/profileicon/588.png";
     var nickname = "BMac9715";
     var server = "Latinoamerica Norte (LAN)";
     var level = "Level 107";

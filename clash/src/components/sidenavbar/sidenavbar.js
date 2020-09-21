@@ -1,6 +1,7 @@
 import React from "react";
 import clsx from "clsx";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { Link, Switch, Route } from "react-router-dom";
 import Drawer from "@material-ui/core/Drawer";
 import List from "@material-ui/core/List";
 import Divider from "@material-ui/core/Divider";
@@ -16,11 +17,12 @@ import GroupIcon from '@material-ui/icons/Group';
 import KeyboardReturnIcon from '@material-ui/icons/KeyboardReturn';
 import CalendarTodayIcon from '@material-ui/icons/CalendarToday';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import TeamsMain from '../teams/teamsmain.js'
-import Profile from '../profile/profile.js'
+import TeamsMain from '../teams/teamsmain.js';
+import Profile from '../profile/profile.js';
+import NewTeam from '../teams/newteam.js';
 
 const drawerWidth = 240;
-var openclose = false;
+var openclose = true;
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -90,7 +92,7 @@ const useStyles = makeStyles((theme) => ({
 const SideNavBar = () => {
   const classes = useStyles();
   const theme = useTheme();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(true);
 
   const handleDrawerOpenClose = () => {
     if(openclose){
@@ -129,14 +131,14 @@ const SideNavBar = () => {
         </div>
         <Divider />
         <List>
-          {["Perfil", "Mis Equipos", "Buscar Equipos", "Calendarios"].map((text, index) => (
-            <ListItem button key={text}>
+          {[{text: "Perfil", link:"/profile"}, {text: "Mis Equipos", link:"/teams"} , {text: "Buscar Equipos", link:"/new"}, {text: "Calendarios", link:"/calendars"}].map((item, index) => (
+            <ListItem button component={Link} to={item.link} key={item.text}>
               <ListItemIcon>
                 {index === 0 ? <AssignmentIndIcon /> : 
                  index === 1 ? <GroupIcon /> : 
                  index === 2 ? <SearchIcon /> : <CalendarTodayIcon /> }
               </ListItemIcon>
-              <ListItemText primary={text} />
+              <ListItemText primary={item.text} />
             </ListItem>
           ))}
         </List>
@@ -152,7 +154,9 @@ const SideNavBar = () => {
           ))}
         </List>
       </Drawer>
-      <TeamsMain />
+      <Route path="/profile" component={Profile}></Route>
+      <Route path="/teams" component={TeamsMain}></Route>
+      <Route path="/new" component={NewTeam}></Route>
     </div>
   );
 };
