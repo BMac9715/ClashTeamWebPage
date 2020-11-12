@@ -23,11 +23,11 @@ const useStyles = makeStyles((theme) => ({
       alignSelf: 'center',
     },
     crdProfile:{
-        paddingLeft: theme.spacing(13),
-        paddingRight: theme.spacing(13),
+        paddingLeft: theme.spacing(10),
+        paddingRight: theme.spacing(10),
         paddingTop: theme.spacing(2),
-        marginTop: theme.spacing(2),
-        marginBottom: theme.spacing(2),
+        marginTop: theme.spacing(3),
+        marginBottom: theme.spacing(3),
     },
     crdRow:{
         marginTop: theme.spacing(1),
@@ -218,6 +218,5 @@ const Profile = () => {
         </Container>
     );
 };
-
 
 export default Profile;

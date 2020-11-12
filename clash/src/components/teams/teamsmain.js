@@ -1,6 +1,8 @@
 import React from "react";
 import { withStyles, makeStyles, useTheme } from "@material-ui/core/styles";
 import Typography from '@material-ui/core/Typography';
+import Container from '@material-ui/core/Container';
+import Card from '@material-ui/core/Card';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -47,6 +49,9 @@ import DeleteIcon from '@material-ui/icons/Delete';
     table: {
       minWidth: 700,
     },
+    tablecontainer: {
+      marginBottom: theme.spacing(4),
+    },
     content: {
       flexGrow: 1,
       padding: theme.spacing(3),
@@ -55,6 +60,13 @@ import DeleteIcon from '@material-ui/icons/Delete';
       marginLeft: theme.spacing(3),
       marginRight: theme.spacing(3),
       marginTop: theme.spacing(2),
+    },
+    crdTeams:{
+      paddingLeft: theme.spacing(10),
+      paddingRight: theme.spacing(10),
+      paddingTop: theme.spacing(2),
+      marginTop: theme.spacing(3),
+      marginBottom: theme.spacing(3),
     },
     button: {
       marginTop: theme.spacing(3),
@@ -74,49 +86,49 @@ import DeleteIcon from '@material-ui/icons/Delete';
   }));
  
 const TeamsMain = () => {
-
     const classes = useStyles();
 
     return (
-      <main className={classes.content}>
-        <Typography variant="h5">Mis Equipos</Typography>
+      <Container fixed>
+        <Card className={classes.crdTeams}>
+          <Typography variant="h5">MIS EQUIPOS</Typography>
+          <Button 
+            variant="contained" 
+            size="large"
+            color="primary" 
+            className={classes.button}
+            startIcon={<AddIcon />}
+          >
+          CREAR
+          </Button>
 
-        <Button 
-          variant="contained" 
-          size="large"
-          color="primary" 
-          className={classes.button}
-          startIcon={<AddIcon />}
-        >
-        CREAR
-        </Button>
-        
-        <TableContainer component={Paper}>
-            <Table color="primary-ligth" className={classes.table} aria-label="customized table">
-              <TableHead>
-                <TableRow>
-                  <StyledTableCell align="center">Equipo</StyledTableCell>
-                  <StyledTableCell align="center">Jornada</StyledTableCell>
-                  <StyledTableCell align="center">Vigencia</StyledTableCell>
-                  <StyledTableCell align="center">Acciones</StyledTableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {rows.map((row) => (
-                  <StyledTableRow key={row.team}>
-                    <StyledTableCell align="center">{row.team}</StyledTableCell>
-                    <StyledTableCell align="center">{row.journey}</StyledTableCell>
-                    <StyledTableCell align="center">{row.validity}</StyledTableCell>
-                    <StyledTableCell align="center">
-                      <Button variant="contained" color="success" className={classes.btnedit}>Editar</Button>
-                      <Button variant="contained" color="error" className={classes.btndelete} size="" startIcon={<DeleteIcon />}>Eliminar</Button>
-                    </StyledTableCell>
-                  </StyledTableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>      
-      </main>    
+          <TableContainer  className={classes.tablecontainer} component={Paper}>
+              <Table color="primary-ligth" className={classes.table} aria-label="customized table">
+                <TableHead>
+                  <TableRow>
+                    <StyledTableCell align="center">Equipo</StyledTableCell>
+                    <StyledTableCell align="center">Jornada</StyledTableCell>
+                    <StyledTableCell align="center">Vigencia</StyledTableCell>
+                    <StyledTableCell align="center">Acciones</StyledTableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {rows.map((row) => (
+                    <StyledTableRow key={row.team}>
+                      <StyledTableCell align="center">{row.team}</StyledTableCell>
+                      <StyledTableCell align="center">{row.journey}</StyledTableCell>
+                      <StyledTableCell align="center">{row.validity}</StyledTableCell>
+                      <StyledTableCell align="center">
+                        <Button variant="contained" color="success" className={classes.btnedit}>Editar</Button>
+                        <Button variant="contained" color="error" className={classes.btndelete} size="" startIcon={<DeleteIcon />}>Eliminar</Button>
+                      </StyledTableCell>
+                    </StyledTableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>      
+        </Card>       
+      </Container>   
     );
 };
 

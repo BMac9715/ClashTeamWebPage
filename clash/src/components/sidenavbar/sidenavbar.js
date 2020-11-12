@@ -1,7 +1,7 @@
 import React from "react";
 import clsx from "clsx";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
-import { Link, Switch, Route } from "react-router-dom";
+import { Link, Switch, Route, Redirect, useRouteMatch } from "react-router-dom";
 import Drawer from "@material-ui/core/Drawer";
 import List from "@material-ui/core/List";
 import Divider from "@material-ui/core/Divider";
@@ -20,6 +20,8 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import TeamsMain from '../teams/teamsmain.js';
 import Profile from '../profile/profile.js';
 import NewTeam from '../teams/newteam.js';
+import Calendar from '../calendars/calendar.js';
+import Search from '../teams/search.js';
 
 const drawerWidth = 240;
 var openclose = true;
@@ -94,6 +96,8 @@ const SideNavBar = () => {
   const theme = useTheme();
   const [open, setOpen] = React.useState(true);
 
+  let match = useRouteMatch();
+
   const handleDrawerOpenClose = () => {
     if(openclose){
       openclose = false;
@@ -131,8 +135,8 @@ const SideNavBar = () => {
         </div>
         <Divider />
         <List>
-          {[{text: "Perfil", link:"/profile"}, {text: "Mis Equipos", link:"/teams"} , {text: "Buscar Equipos", link:"/new"}, {text: "Calendarios", link:"/calendars"}].map((item, index) => (
-            <ListItem button component={Link} to={item.link} key={item.text}>
+          {[{text: "Perfil", link:"profile"}, {text: "Mis Equipos", link:"teams"} , {text: "Buscar Equipos", link:"search"}, {text: "Calendarios", link:"calendars"}].map((item, index) => (
+            <ListItem button component={Link} to={`${match.url}/${item.link}`} key={item.text}>
               <ListItemIcon>
                 {index === 0 ? <AssignmentIndIcon /> : 
                  index === 1 ? <GroupIcon /> : 
@@ -154,9 +158,17 @@ const SideNavBar = () => {
           ))}
         </List>
       </Drawer>
-      <Route path="/profile" component={Profile}></Route>
-      <Route path="/teams" component={TeamsMain}></Route>
-      <Route path="/new" component={NewTeam}></Route>
+      <Switch>
+        <Route exact path={`${match.path}/`} render={()=>{
+              return(
+                <Redirect to={`${match.url}/profile`}/>
+              )
+            }}/>
+        <Route exact path={`${match.path}/profile`} component={Profile}></Route>
+        <Route exact path={`${match.path}/teams`} component={TeamsMain}></Route>
+        <Route exact path={`${match.path}/search`} component={Search}></Route>
+        <Route exact path={`${match.path}/calendars`} component={Calendar}></Route>
+      </Switch>    
     </div>
   );
 };
