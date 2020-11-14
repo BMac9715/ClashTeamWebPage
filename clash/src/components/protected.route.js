@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {Route, Redirect} from 'react-router-dom';
-import auth from "../services/auth";
+import { isAuthenticated } from '../services/auth.service';
 
 export const ProtectedRoute = ({component: Component, ...rest}) => {
     return (
@@ -8,7 +8,7 @@ export const ProtectedRoute = ({component: Component, ...rest}) => {
             {...rest} 
             render={
             props =>{
-                if(auth.isAuthenticated()){
+                if(isAuthenticated()){
                     return <Component {...props} />
                 }
                 else{

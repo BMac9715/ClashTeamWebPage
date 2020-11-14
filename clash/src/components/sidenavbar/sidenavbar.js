@@ -19,9 +19,9 @@ import CalendarTodayIcon from '@material-ui/icons/CalendarToday';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TeamsMain from '../teams/teamsmain.js';
 import Profile from '../profile/profile.js';
-import NewTeam from '../teams/newteam.js';
 import Calendar from '../calendars/calendar.js';
 import Search from '../teams/search.js';
+import { Logout } from '../../services/auth.service';
 
 const drawerWidth = 240;
 var openclose = true;
@@ -91,7 +91,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const SideNavBar = () => {
+const SideNavBar = props => {
+  console.log(props);
   const classes = useStyles();
   const theme = useTheme();
   const [open, setOpen] = React.useState(true);
@@ -107,6 +108,12 @@ const SideNavBar = () => {
       setOpen(true);
     }  
   };
+
+  const UserLogout = () => {
+    Logout();
+
+    props.props.history.push(`/home/signin`);
+  }
 
   return (
     <div className={classes.root}>
@@ -149,7 +156,7 @@ const SideNavBar = () => {
         <Divider />
         <List>
           {["Cerra Sesión"].map((text, index) => (
-            <ListItem button key={text}>
+            <ListItem button key={text} onClick={UserLogout}>
               <ListItemIcon>
                 {index % 2 === 0 ? <KeyboardReturnIcon /> : <SearchIcon />}
               </ListItemIcon>

@@ -2,11 +2,11 @@ import React from "react";
 import SideNavBar from "../sidenavbar/sidenavbar";
 import Navbar from "../navbar/Navbar";
 
-const Dashboard = () => {
+const Dashboard = props => {
     return (
         <div>
             <Navbar/>
-            <SideNavBar/>   
+            <SideNavBar props={props}/>   
         </div>  
     );
 };

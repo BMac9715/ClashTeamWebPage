@@ -1,18 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import TextField from "@material-ui/core/TextField";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Checkbox from "@material-ui/core/Checkbox";
 import Paper from "@material-ui/core/Paper";
 import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { makeStyles } from "@material-ui/core/styles";
 import logo from "../../assets/images/minion.png";
 import { Link, Switch, Route, useRouteMatch, Redirect } from "react-router-dom";
-import auth from "../../services/auth";
+import { SignInCognito, SignUpCognito, ConfirmRegistration, ForgotPassword, ConfirmPassword } from "../../services/cognito.service";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -69,6 +68,7 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "column",
     alignItems: "center",
     alignSelf: "center",
+    width: "-webkit-fill-available",
   },
   avatar: {
     width: theme.spacing(10),
@@ -80,8 +80,29 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(1),
   },
   submit: {
-    margin: theme.spacing(3, 0, 2),
+    margin: theme.spacing(2, 0, 2),
   },
+  success: {
+    backgroundColor: "#ace0ac",
+    color: "#348c34",
+    textAlign: 'center',
+    padding: theme.spacing(2),
+    marginTop: theme.spacing(2)
+  },
+  error: {
+    backgroundColor: "#ef9a9a",
+    color: "brown",
+    textAlign: 'center',
+    padding: theme.spacing(2),
+    marginTop: theme.spacing(2)
+  },
+  barProgress: {
+    textAlign: 'center',
+    margin: theme.spacing(2),
+  },
+  spaceTop: {
+    marginTop: theme.spacing(2),
+  }
 }));
 
 const Copyright = () => {
@@ -104,7 +125,207 @@ const Home = props => {
   const classes = useStyles();
 
   let match = useRouteMatch();
-  console.log(match);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const [name, setName] = useState('');
+  const [lastname, setLastname] = useState('');
+  const [code, setCode] = useState('');
+  const [message, setMessage] = useState('');
+  const [cognitoUser, setCognitoUser] = useState('');
+
+  const SignIn = event => {
+    event.preventDefault();
+
+    setMessage(<CustomCircularProgress/>);
+
+    setTimeout(() => {
+      SignInCognito(email, password)
+      .then(data => {
+        console.log(data);
+        setMessage(
+          <div className={classes.success}>
+            <span>Autenticación correcta</span>
+          </div>
+        );
+        clearInterval(this); 
+
+        setTimeout(() => {
+          setMessage(null);
+          clearInterval(this);
+          props.history.push(`/dashboard`);
+        }, 1500); 
+      })
+      .catch(err => { 
+        setMessage(
+          <div className={classes.error}>
+            <span>{err.message}</span>
+          </div>
+        );
+        clearInterval(this);   
+      });
+    }, 1000);
+  }
+
+  const SignUp = event => {
+    event.preventDefault();
+
+    setMessage(<CustomCircularProgress/>);
+    
+    if(password === confirmPassword){
+      SignUpCognito(email, password, name, lastname, username)
+      .then(data => {
+        setCognitoUser(data.user);
+        setMessage(
+          <div className={classes.success}>
+            <span>Registro exitoso</span>
+          </div>
+        );
+        
+        setTimeout(() => {
+          setMessage(null);
+          clearInterval(this);
+          props.history.push(`${match.url}/confirm`);
+        }, 1200); 
+      })
+      .catch(err => {
+        setMessage(
+          <div className={classes.error}>
+            <span>{err.message}</span>
+          </div>
+        );
+      });
+    }
+    else{
+      setMessage(
+        <div className={classes.error}>
+          <span>La confirmación de contraseña no coincide</span>
+        </div>
+      );
+    }  
+  }
+
+  const UserForgotPassword = event => {
+    event.preventDefault();
+
+    setMessage(<CustomCircularProgress/>);
+    
+    ForgotPassword(email)
+    .then( data => {
+      setMessage(
+        <div className={classes.success}>
+          <span>{data.message}</span>
+        </div>
+      );
+
+      setTimeout(() => {
+        setMessage(null);
+        clearInterval(this);
+        props.history.push(`${match.url}/newPassword`);
+      }, 2000);
+    })
+    .catch( err => {
+      setMessage(
+        <div className={classes.error}>
+          <span>{err.message}</span>
+        </div>
+      );
+    });
+  }
+
+  const ConfirmNewPassword = event => {
+    event.preventDefault();
+
+    setMessage(<CustomCircularProgress/>);
+
+    if(password === confirmPassword){
+      ConfirmPassword(email, code, password)
+      .then(data => {
+        setMessage(
+          <div className={classes.success}>
+            <span>Se ha realizado el cambio correctamente</span>
+          </div>
+        );
+        
+        setTimeout(() => {
+          setMessage(null);
+          clearInterval(this);
+          props.history.push(`${match.url}/signin`);
+        }, 2000); 
+      })
+      .catch(err => {
+        setMessage(
+          <div className={classes.error}>
+            <span>{err.message}</span>
+          </div>
+        );
+
+        setTimeout(() => {
+          setMessage(null);
+          clearInterval(this);
+          props.history.push(`${match.url}/forgotPassword`);
+        }, 2000);
+
+      });
+    }
+    else{
+      setMessage(
+        <div className={classes.error}>
+          <span>La confirmación de contraseña no coincide</span>
+        </div>
+      );
+    }  
+  }
+
+  const ConfirmUserRegistration = event => {
+    event.preventDefault();
+
+    setMessage(<CustomCircularProgress/>);
+
+    ConfirmRegistration(cognitoUser, code)
+    .then(data => { 
+      setMessage(
+        <div className={classes.success}>
+          <span>Confirmación exitosa</span>
+        </div>
+      );
+
+      setTimeout(() => {
+        setMessage(null);
+        props.history.push(`${match.url}/signin`);
+        clearInterval(this)
+      }, 1200);
+    })
+    .catch(err => {
+      setMessage(
+        <div className={classes.error}>
+          <span>{err.message}</span>
+        </div>
+      );
+      setTimeout(() => {
+        setMessage(null);
+        props.history.push(`${match.url}/signup`);
+        clearInterval(this)
+      }, 2000);
+    });
+  }
+
+  const CustomCircularProgress = () => 
+  {
+    return(
+      <div className={classes.barProgress}>
+        <CircularProgress color="secondary" />
+        <div>
+          <span>Procesando solicitud</span>
+        </div>
+      </div>
+    );
+  }
+
+  const ClearMessage = () => {
+    setMessage(null);
+  }
 
   return (
     <Grid container component="main" className={classes.root}>
@@ -140,17 +361,16 @@ const Home = props => {
               <Typography component="h1" variant="h4">
                 Inicio de Sesión
               </Typography>
-              <form className={classes.form} noValidate>
+              <form className={classes.form} onSubmit={SignIn} noValidate>
                 <TextField
                   variant="outlined"
                   margin="normal"
                   required
                   fullWidth
                   id="email"
-                  label="Correo Electrónico"
+                  label="Nombre de Invocador o Correo Electrónico"
                   name="email"
-                  autoComplete="email"
-                  autoFocus
+                  onChange={event => setEmail(event.target.value)}
                 />
                 <TextField
                   variant="outlined"
@@ -161,35 +381,27 @@ const Home = props => {
                   label="Contraseña"
                   type="password"
                   id="password"
-                  autoComplete="current-password"
+                  onChange={event => setPassword(event.target.value)}
                 />
-                <FormControlLabel
-                  control={<Checkbox value="remember" color="primary" />}
-                  label="Recordarme"
-                />
+                { message } 
                 <Button
-                  type="button"
+                  type="submit"
                   fullWidth
                   variant="contained"
                   color="primary"
                   className={classes.submit}
-                  onClick={() => {
-                      auth.login(()=>{
-                        props.history.push("/dashboard");
-                      })
-                  }}
                 >
                   Sign In
                 </Button>
                 <Grid container>
                   <Grid item xs>
-                    <Link variant="body2" to={`${match.url}/signup`}>
+                    <Link variant="body2" to={`${match.url}/forgotPassword`} onClick={ClearMessage}>
                       ¿Olvidate tu contraseña?
                     </Link>
                   </Grid>
                   <Grid item>
                     ¿No tienes una cuenta?  
-                    <Link variant="body2" to={`${match.url}/signup`}>
+                    <Link variant="body2" to={`${match.url}/signup`} onClick={ClearMessage}>
                       {" Registrate"}
                     </Link>
                   </Grid>
@@ -206,7 +418,7 @@ const Home = props => {
               <Typography component="h1" variant="h4">
                 Registro
               </Typography>
-              <form className={classes.form} noValidate>
+              <form className={classes.form} noValidate onSubmit={SignUp}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
                     <TextField
@@ -218,6 +430,7 @@ const Home = props => {
                       id="firstName"
                       label="Nombre"
                       autoFocus
+                      onChange={event => setName(event.target.value)}
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
@@ -228,7 +441,7 @@ const Home = props => {
                       id="lastName"
                       label="Apellido"
                       name="lastName"
-                      autoComplete="lname"
+                      onChange={event => setLastname(event.target.value)}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -239,7 +452,7 @@ const Home = props => {
                       id="nickname"
                       label="Nombre de Invocador"
                       name="nickname"
-                      autoComplete="nickname"
+                      onChange={event => setUsername(event.target.value)}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -247,10 +460,10 @@ const Home = props => {
                       variant="outlined"
                       required
                       fullWidth
-                      id="email"
+                      id="email_signup"
                       label="Correo Electrónico"
-                      name="email"
-                      autoComplete="email"
+                      name="email_signup"
+                      onChange={event => setEmail(event.target.value)}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -262,7 +475,7 @@ const Home = props => {
                       label="Contraseña"
                       type="password"
                       id="password"
-                      autoComplete="current-password"
+                      onChange={event => setPassword(event.target.value)}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -274,10 +487,11 @@ const Home = props => {
                       label="Confirmar Contraseña"
                       type="password"
                       id="password"
-                      autoComplete="current-password"
+                      onChange={event => setConfirmPassword(event.target.value)}
                     />
                   </Grid>
                 </Grid>
+                {message}
                 <Button
                   type="submit"
                   fullWidth
@@ -290,11 +504,165 @@ const Home = props => {
                 <Grid container justify="flex-end">
                   <Grid item>
                     ¿Ya tienes cuenta? 
-                    <Link variant="body2" to={`${match.url}/signin`}>
+                    <Link variant="body2" to={`${match.url}/signin`} onClick={ClearMessage}>
                       {" Inicia Sesión"}
                     </Link>
                   </Grid>
                 </Grid>
+                <Box mt={5}>
+                  <Copyright />
+                </Box>
+              </form>
+            </div>
+          </Route>
+          <Route exact path={`${match.path}/confirm`}>
+            <div className={classes.paper}>
+              <Avatar src={logo} className={classes.avatar} />
+              <Typography component="h1" variant="h4">
+                Confirmar Registro
+              </Typography>
+              <Typography variant="subtitle1" className={classes.spaceTop}>
+                Ingrese el código de verificación enviado al correo eléctronico registrado
+              </Typography>
+              <form className={classes.form} onSubmit={ConfirmUserRegistration} noValidate>
+                <TextField
+                  variant="outlined"
+                  margin="normal"
+                  required
+                  fullWidth
+                  name="code"
+                  label="Código de verificación"
+                  id="code"
+                  onChange={event => setCode(event.target.value)}
+                /> 
+                { message }          
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  className={classes.submit}
+                >
+                  Confirmar
+                </Button>       
+                <Box mt={5}>
+                  <Copyright />
+                </Box>
+              </form>
+            </div>
+          </Route>
+          <Route exact path={`${match.path}/forgotPassword`}>
+            <div className={classes.paper}>
+              <Avatar src={logo} className={classes.avatar} />
+              <Typography component="h1" variant="h4">
+                Recuperar Contraseña
+              </Typography>
+              <Typography variant="subtitle1" className={classes.spaceTop}>
+                Ingrese la dirección de correo eléctronico registrado
+              </Typography>
+              <form className={classes.form} onSubmit={UserForgotPassword} noValidate>
+                <TextField
+                  variant="outlined"
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="email_forgot"
+                  label="Correo Electrónico"
+                  name="email_forgot"
+                  onChange={event => setEmail(event.target.value)}
+                  value= {email}
+                />
+                { message } 
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  className={classes.submit}
+                >
+                  Enviar
+                </Button>
+                <Grid container>
+                  <Grid item xs>
+                    <Link variant="body2" to={`${match.url}/signin`} onClick={ClearMessage}>
+                      Iniciar Sesión
+                    </Link>
+                  </Grid>
+                  <Grid item>
+                    <Link variant="body2" to={`${match.url}/signup`} onClick={ClearMessage}>
+                      Registrarse
+                    </Link>
+                  </Grid>
+                </Grid>
+                <Box mt={5}>
+                  <Copyright />
+                </Box>
+              </form>
+            </div>
+          </Route>
+          <Route exact path={`${match.path}/newPassword`}>
+            <div className={classes.paper}>
+              <Avatar src={logo} className={classes.avatar} />
+              <Typography component="h1" variant="h4">
+                Nueva Contraseña
+              </Typography>
+              <Typography variant="subtitle1" className={classes.spaceTop}>
+                Ingrese el código de recuperación y configure la nueva contraseña
+              </Typography>
+              <form className={classes.form} onSubmit={ConfirmNewPassword} noValidate>
+                <TextField
+                  variant="outlined"
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="email_cnfpass"
+                  label="Correo Electrónico"
+                  name="email_cnfpass"
+                  disabled
+                  value= {email}
+                />
+                <TextField
+                  variant="outlined"
+                  margin="normal"
+                  required
+                  fullWidth
+                  name="code_confPass"
+                  label="Código de recuperación"
+                  id="code_confPass"
+                  onChange={event => setCode(event.target.value)}
+                /> 
+                <TextField
+                  variant="outlined"
+                  margin="normal"
+                  required
+                  fullWidth
+                  name="password_cnfPass"
+                  label="Nueva Contraseña"
+                  type="password"
+                  id="password_cnfPass"
+                  onChange={event => setPassword(event.target.value)}
+                />
+                <TextField
+                  variant="outlined"
+                  margin="normal"
+                  required
+                  fullWidth
+                  name="conf_password_conf"
+                  label="Confirmar Contraseña"
+                  type="password"
+                  id="conf_password_conf"
+                  onChange={event => setConfirmPassword(event.target.value)}
+                />
+                { message } 
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  className={classes.submit}
+                >
+                  Enviar
+                </Button>
                 <Box mt={5}>
                   <Copyright />
                 </Box>
