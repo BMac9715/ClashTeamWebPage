@@ -1,12 +1,22 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import Avatar from '@material-ui/core/Avatar';
 import Typography from '@material-ui/core/Typography';
 import Card from '@material-ui/core/Card';
 import Divider from '@material-ui/core/Divider';
-import Gold from '../../assets/images/Emblem_Gold.png';
-import Platinum from '../../assets/images/Emblem_Platinum.png';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import IRON from '../../assets/images/Emblem_Iron.png';
+import BRONZE from '../../assets/images/Emblem_Bronze.png';
+import SILVER from '../../assets/images/Emblem_Silver.png';
+import GOLD from '../../assets/images/Emblem_Gold.png';
+import PLATINUM from '../../assets/images/Emblem_Platinum.png';
+import DIAMOND from '../../assets/images/Emblem_Diamond.png';
+import MASTER from '../../assets/images/Emblem_Master.png';
+import GRANDMASTER from '../../assets/images/Emblem_Grandmaster.png'
+import CHALLENGER from '../../assets/images/Emblem_Challenger.png';
+import Poro from '../../assets/images/poro.png';
+import { GetCompleteProfile } from '../../services/riot.service';
 
 const useStyles = makeStyles((theme) => ({
     large: {
@@ -15,7 +25,6 @@ const useStyles = makeStyles((theme) => ({
       marginRight: theme.spacing(5),
     },
     content:{
-      display: 'flex',
       marginTop: theme.spacing(1),
       marginBottom: theme.spacing(2),
     },
@@ -28,6 +37,7 @@ const useStyles = makeStyles((theme) => ({
         paddingTop: theme.spacing(2),
         marginTop: theme.spacing(3),
         marginBottom: theme.spacing(3),
+        textAlign: '-webkit-center',
     },
     crdRow:{
         marginTop: theme.spacing(1),
@@ -35,7 +45,18 @@ const useStyles = makeStyles((theme) => ({
     },
     center:{
         textAlign: 'center',
-    }
+    },
+    left:{
+        textAlign: 'left',
+    },
+    barProgress: {
+        textAlign: 'center',
+        margin: theme.spacing(2),
+    },
+    prfHeader:{
+        display: 'flex',
+        margin: theme.spacing(3),
+    },
   }));
 
 const useStylesChamp = makeStyles((theme) => ({
@@ -86,6 +107,45 @@ const useStyleRanked = makeStyles((theme) => ({
     }
 })); 
 
+const useStyleNoData = makeStyles((theme)=> ({
+    extraLarge:{
+        width: theme.spacing(25),
+        height: theme.spacing(25),
+        marginRight: theme.spacing(5),
+    },
+    content:{
+        marginTop: theme.spacing(10),
+        marginBottom: theme.spacing(20),
+        display: 'inline-block',
+        textAlign: '-webkit-center',
+        opacity: '0.7'
+    }
+}));
+
+const NoData = () => {
+    const classes = useStyleNoData();
+
+    return (
+        <div className={classes.content}>
+            <Avatar alt="Remy Sharp" src={Poro} className={classes.extraLarge}/>
+            <Typography variant="subtitle1">No fue posible obtener datos. Vuelve a intentarlo.</Typography>
+        </div>
+    );
+}
+
+const CustomCircularProgress = () => 
+{
+  const classes = useStyles();
+  return(
+    <div className={classes.barProgress}>
+      <CircularProgress color="secondary" size="80px"/>
+      <div>
+        <span>Procesando solicitud</span>
+      </div>
+    </div>
+  );
+}
+
 const Champ = (params) => {
     const classes = useStylesChamp();
 
@@ -101,13 +161,38 @@ const Champ = (params) => {
     );
 }
 
+const Emblems = (tier) => {
+    switch(tier){
+        case "IRON":
+            return IRON;
+        case "BRONZE":
+            return BRONZE;
+        case "SILVER": 
+            return SILVER;
+        case "GOLD":
+            return GOLD;
+        case "PLATINUM":
+            return PLATINUM;
+        case "DIAMOND":
+            return DIAMOND;
+        case "MASTER":
+            return MASTER;
+        case "GRANDMASTER":
+            return GRANDMASTER;
+        case "CHALLENGER":
+            return CHALLENGER;
+        default:
+            return null;
+    }
+}
+
 const Ranked = (params) => {
     const classes = useStyleRanked();
 
     return (
     <div className={classes.crdRank}>
-        <Typography variant="h5">{params.ranked.queueType}</Typography>
-        <Avatar variant="square" src={params.ranked.emblem} className={classes.large} />
+        <Typography variant="h6">{params.ranked.queueType}</Typography>
+        <Avatar variant="square" src={Emblems(params.ranked.tier)} className={classes.large} />
         <div className={classes.rankInfo}>
             <Typography variant="h6">{params.ranked.rank}</Typography>
             <Typography variant="subtitle1">{params.ranked.points} pts</Typography>
@@ -119,101 +204,67 @@ const Ranked = (params) => {
     );
 }
 
-const Profile = () => {
+const ProfileSummoner = (params) => {
     const classes = useStyles();
 
-    var profileIcon = "http://ddragon.leagueoflegends.com/cdn/10.19.1/img/profileicon/588.png";
-    var nickname = "BMac9715";
-    var server = "Latinoamerica Norte (LAN)";
-    var level = "Level 107";
+    return ( 
+        <div className={classes.content}>
+            <div className={classes.prfHeader}>
+                <Avatar alt="Remy Sharp" src={params.params.profileIcon} className={classes.large} />
+                <div className={classes.left}>
+                    <Typography variant="h4">{params.params.nickname}</Typography>
+                    <Typography variant="subtitle1">{params.params.server}</Typography>
+                    <Typography variant="subtitle1">{params.params.level}</Typography>
+                </div>
+            </div>
+            <Divider />
+            <div className={classes.crdRow}>
+                <Typography variant="h5">CLASIFICATORIAS</Typography>
+                <div className={classes.center}>
+                    {params.params.ranks.map(rank => {
+                        return <Ranked ranked={rank}></Ranked>
+                    })}
+                </div>
+            </div>
+            <Divider />
+            <div className={classes.crdRow}>
+                <Typography variant="h5">CAMPEONES</Typography>
+                <div className={classes.center}>
+                    {params.params.champs.map(champ => {
+                        return <Champ info={champ}></Champ>
+                    })}
+                </div> 
+            </div>
+        </div>  
+    );
+}
 
-    var champs = [
-        {
-            icon:"http://ddragon.leagueoflegends.com/cdn/10.19.1/img/champion/Aatrox.png",
-            championName: "Aatrox",
-            championLevel: 7,
-            championPoints: 179331
-        },
-        {
-            icon:"http://ddragon.leagueoflegends.com/cdn/10.19.1/img/champion/Chogath.png",
-            championName: "Chogath",
-            championLevel: 7,
-            championPoints: 179331
-        },
-        {
-            icon:"http://ddragon.leagueoflegends.com/cdn/10.19.1/img/champion/Nautilus.png",
-            championName: "Nautilus",
-            championLevel: 7,
-            championPoints: 200000
-        },
-        {
-            icon:"http://ddragon.leagueoflegends.com/cdn/10.19.1/img/champion/Fiora.png",
-            championName: "Fiora",
-            championLevel: 6,
-            championPoints: 210024
-        },
-        {
-            icon:"http://ddragon.leagueoflegends.com/cdn/10.19.1/img/champion/Thresh.png",
-            championName: "Thresh",
-            championLevel: 6,
-            championPoints: 150789
-        },
-        {
-            icon:"http://ddragon.leagueoflegends.com/cdn/10.19.1/img/champion/Teemo.png",
-            championName: "Teemo",
-            championLevel: 5,
-            championPoints: 150789
-        }
-    ];
+const Profile = () => {
+    const classes = useStyles();
+    const [spinner, setSpinner] = useState('');
+    const [profile, setProfile] = useState('');
 
-    var ranks = [
-        {
-            rank: "ORO III",
-            emblem: Gold,
-            wins: 21,
-            losses: 19,
-            points: 72,
-            queueType: "RANKED SOLO 5x5"
-        },
-        {
-            rank: "PLATINO IV",
-            emblem: Platinum,
-            wins: 20,
-            losses: 8,
-            points: 58,
-            queueType: "RANKED FLEX SR"
-        }
-    ]
+    useEffect(() => {
+        setSpinner(<CustomCircularProgress/>);
+
+        GetCompleteProfile(localStorage.getItem('summonerName'))
+        .then(data => {
+            setSpinner(null);
+            setProfile(<ProfileSummoner params={data} />);
+        })
+        .catch(err => {
+            console.error(err);
+            setSpinner(null);
+            setProfile(<NoData />);
+        });
+
+    }, []);
 
     return (
         <Container fixed>
             <Card className={classes.crdProfile}>
-                <div className={classes.content}>
-                    <Avatar alt="Remy Sharp" src={profileIcon} className={classes.large} />
-                    <div className={classes.dprof}>
-                        <Typography variant="h4">{nickname}</Typography>
-                        <Typography variant="subtitle1">{server}</Typography>
-                        <Typography variant="subtitle1">{level}</Typography>
-                    </div>
-                </div>
-                <Divider />
-                <div className={classes.crdRow}>
-                    <Typography variant="h6">Clasificatoria</Typography>
-                    <div className={classes.center}>
-                        {ranks.map(rank => {
-                            return <Ranked ranked={rank}></Ranked>
-                        })}
-                    </div>
-                </div>
-                <Divider />
-                <div className={classes.crdRow}>
-                    <Typography variant="h6">Campeones</Typography>
-                    <div className={classes.center}>
-                        {champs.map(champ => {
-                            return <Champ info={champ}></Champ>
-                        })}
-                    </div> 
-                </div>                    
+                { spinner }
+                { profile }                        
             </Card>
         </Container>
     );

@@ -1,14 +1,18 @@
-import React from "react";
+import React, { useEffect, useState }  from "react";
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import Avatar from '@material-ui/core/Avatar';
 import Typography from '@material-ui/core/Typography';
 import Card from '@material-ui/core/Card';
-import Divider from '@material-ui/core/Divider';
 import Cup from '../../assets/images/cup.jpg';
 import Poro from '../../assets/images/poro.png';
 import Button from '@material-ui/core/Button';
 import AddIcon from '@material-ui/icons/Add';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import Divider from '@material-ui/core/Divider';
+import { GetCalendars } from '../../services/riot.service';
 
 const useStyles = makeStyles((theme) => ({
     large: {
@@ -38,12 +42,17 @@ const useStyles = makeStyles((theme) => ({
     center:{
         textAlign: 'center',
     },
+    barProgress: {
+        textAlign: 'center',
+        margin: theme.spacing(2),
+    },
+    lstCust:{
+        display: 'inline-grid',
+    },
   }));
 
 const useStylesTournament = makeStyles((theme) => ({
     crdCalendar:{
-        marginTop: theme.spacing(2),
-        marginBottom: theme.spacing(2),
         marginLeft: theme.spacing(3),
         marginRight: theme.spacing(3),
         padding: theme.spacing(1),
@@ -59,6 +68,7 @@ const useStylesTournament = makeStyles((theme) => ({
     },
     crdCalendarInfo:{
         textAlign: 'left',
+        width: theme.spacing(60),
         marginTop: theme.spacing(1),
         marginBottom: theme.spacing(1),
         marginLeft: theme.spacing(7),
@@ -95,17 +105,6 @@ const Tournament = (params) => {
                 <Typography variant="h6">{params.calendar.name}</Typography>
                 <Typography variant="subtitle1">{params.calendar.schedule}</Typography>
             </div>
-            <div>
-                <Button 
-                    variant="contained" 
-                    size="large"
-                    color="primary" 
-                    className={classes.button}
-                    startIcon={<AddIcon />}
-                >
-                    CREAR EQUIPO
-                </Button>
-            </div>
         </div>      
     );
 };
@@ -116,50 +115,69 @@ const NoData = () => {
     return (
         <div className={classes.content}>
             <Avatar alt="Remy Sharp" src={Poro} className={classes.extraLarge}/>
-            <Typography variant="subtitles1">Por el momento no existen torneos programados</Typography>
+            <Typography variant="subtitle1">Por el momento no existen torneos programados</Typography>
         </div>
     );
 }
 
+const CustomCircularProgress = () => 
+{
+  const classes = useStyles();
+  return(
+    <div className={classes.barProgress}>
+      <CircularProgress color="secondary" size="80px"/>
+      <div>
+        <span>Procesando solicitud</span>
+      </div>
+    </div>
+  );
+}
+
 const Calendar = () => {
     const classes = useStyles();
+    const [bodyCalendar, setBody] = useState('');
+    const [spinner, setSpinner] = useState('');
+    let schedule = [];
 
-    let schedule = [
-        {
-            "name": "DÍA 2 - ISLAS DE LA SOMBRA",
-            "schedule": "15 DE NOVIEMBRE <> 20:00 hrs"
-        },
-        {
-            "name": "DÍA 3 - ISLAS DE LA SOMBRA",
-            "schedule": "5 DE DICIEMBRE <> 20:00 hrs"
-        },
-        {
-            "name": "DÍA 4 - ISLAS DE LA SOMBRA",
-            "schedule": "6 DE DICIEMBRE <> 20:00 hrs"
-        }
-    ];
-    
-    let bodyCalendar;
-
-    if(schedule.length > 0){
-        bodyCalendar = schedule.map(element => {
-            return (
-                <div>
-                    <Tournament calendar={element}></Tournament>
-                    <Divider/>
-                </div>    
-            );
-     })
-    }
-    else{
-        bodyCalendar = <NoData />;
-    }
+    useEffect(() => {
+        setSpinner(<CustomCircularProgress/>);
+        GetCalendars()
+        .then( data => {
+            schedule = data;
+            setSpinner(null);
+            if(schedule.length > 0){
+                setBody(
+                    <List className={classes.lstCust}>
+                       {
+                        schedule.map(element => {
+                            return (
+                                <div>
+                                    <ListItem>
+                                        <Tournament calendar={element}></Tournament>
+                                    </ListItem>
+                                    <Divider /> 
+                                </div>       
+                            )
+                        })
+                       }
+                    </List>
+                 );
+            }
+            else{
+                setBody(<NoData />);
+            }
+        })
+        .catch( err => {
+            console.error(err);
+        });
+    }, []);
 
     return (
         <Container fixed>
             <Card className={classes.crdCalendar}>
                 <Typography variant="h5">PRÓXIMOS TORNEOS</Typography>
                 <div className={classes.center}>
+                    {spinner}
                     {bodyCalendar}
                 </div>
             </Card>

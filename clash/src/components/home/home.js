@@ -12,6 +12,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import logo from "../../assets/images/minion.png";
 import { Link, Switch, Route, useRouteMatch, Redirect } from "react-router-dom";
 import { SignInCognito, SignUpCognito, ConfirmRegistration, ForgotPassword, ConfirmPassword } from "../../services/cognito.service";
+import { TranslateText } from '../../services/clash.service';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -143,7 +144,6 @@ const Home = props => {
     setTimeout(() => {
       SignInCognito(email, password)
       .then(data => {
-        console.log(data);
         setMessage(
           <div className={classes.success}>
             <span>Autenticación correcta</span>
@@ -158,12 +158,15 @@ const Home = props => {
         }, 1500); 
       })
       .catch(err => { 
-        setMessage(
-          <div className={classes.error}>
-            <span>{err.message}</span>
-          </div>
-        );
-        clearInterval(this);   
+        TranslateText(err.message)
+        .then((data)=>{
+          setMessage(
+            <div className={classes.error}>
+              <span>{data}</span>
+            </div>
+          );
+          clearInterval(this); 
+        });     
       });
     }, 1000);
   }
@@ -190,11 +193,14 @@ const Home = props => {
         }, 1200); 
       })
       .catch(err => {
-        setMessage(
-          <div className={classes.error}>
-            <span>{err.message}</span>
-          </div>
-        );
+        TranslateText(err.message)
+        .then((data)=>{
+          setMessage(
+            <div className={classes.error}>
+              <span>{data}</span>
+            </div>
+          );
+        });
       });
     }
     else{
@@ -226,11 +232,14 @@ const Home = props => {
       }, 2000);
     })
     .catch( err => {
-      setMessage(
-        <div className={classes.error}>
-          <span>{err.message}</span>
-        </div>
-      );
+      TranslateText(err.message)
+        .then((data)=>{
+          setMessage(
+            <div className={classes.error}>
+              <span>{data}</span>
+            </div>
+          );
+        })
     });
   }
 
@@ -255,18 +264,19 @@ const Home = props => {
         }, 2000); 
       })
       .catch(err => {
-        setMessage(
-          <div className={classes.error}>
-            <span>{err.message}</span>
-          </div>
-        );
-
-        setTimeout(() => {
-          setMessage(null);
-          clearInterval(this);
-          props.history.push(`${match.url}/forgotPassword`);
-        }, 2000);
-
+        TranslateText(err.message)
+        .then((data)=>{
+          setMessage(
+            <div className={classes.error}>
+              <span>{data}</span>
+            </div>
+          );
+          setTimeout(() => {
+            setMessage(null);
+            clearInterval(this);
+            props.history.push(`${match.url}/forgotPassword`);
+          }, 2000);
+        });
       });
     }
     else{
@@ -298,16 +308,19 @@ const Home = props => {
       }, 1200);
     })
     .catch(err => {
-      setMessage(
-        <div className={classes.error}>
-          <span>{err.message}</span>
-        </div>
-      );
-      setTimeout(() => {
-        setMessage(null);
-        props.history.push(`${match.url}/signup`);
-        clearInterval(this)
-      }, 2000);
+      TranslateText(err.message)
+      .then((data)=>{
+        setMessage(
+          <div className={classes.error}>
+            <span>{data}</span>
+          </div>
+        );
+        setTimeout(() => {
+          setMessage(null);
+          props.history.push(`${match.url}/signup`);
+          clearInterval(this)
+        }, 2000);
+      });
     });
   }
 
