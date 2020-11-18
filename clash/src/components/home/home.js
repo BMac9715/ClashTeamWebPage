@@ -409,7 +409,7 @@ const Home = props => {
                 <Grid container>
                   <Grid item xs>
                     <Link variant="body2" to={`${match.url}/forgotPassword`} onClick={ClearMessage}>
-                      ¿Olvidate tu contraseña?
+                      ¿Olvidaste tu contraseña?
                     </Link>
                   </Grid>
                   <Grid item>

@@ -1,57 +1,20 @@
-import React from "react";
-import { withStyles, makeStyles, useTheme } from "@material-ui/core/styles";
+import React, { useState, useEffect } from "react";
+import { withStyles, makeStyles } from "@material-ui/core/styles";
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import Card from '@material-ui/core/Card';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
+import CreateIcon from '@material-ui/icons/Create';
+import ContactMailIcon from '@material-ui/icons/ContactMail';
+import Avatar from '@material-ui/core/Avatar';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Poro from '../../assets/images/poro.png';
+import { useRouteMatch, useHistory } from "react-router-dom";
+import { GetTeamClashByOwner, DeleteTeamClash } from '../../services/clash.service';
 
-  const StyledTableCell = withStyles((theme) => ({
-    head: {
-      backgroundColor: theme.palette.primary.main,
-      color: theme.palette.common.white,
-      fontSize: 18,
-    },
-    body: {
-      fontSize: 16,
-    },
-  }))(TableCell);
-  
-  const StyledTableRow = withStyles((theme) => ({
-    root: {
-      '&:nth-of-type(odd)': {
-        backgroundColor: theme.palette.action.hover,
-      },
-    },
-  }))(TableRow);
-  
-  function createData(team, journey, validity) {
-    return { team, journey, validity };
-  }
-  
-  const rows = [
-    createData('Team Quesito', "06 septiembre", 1),
-    createData('Team Kinal', "16 agosto", 0, 37),
-    createData('Kohaku', "01 julio", 0),
-    createData('LED', "20 julio", 0),
-    createData('GT', "21 junio", 0),
-  ];
-  
   const useStyles = makeStyles((theme) => ({
-    table: {
-      minWidth: 700,
-    },
-    tablecontainer: {
-      marginBottom: theme.spacing(4),
-    },
     content: {
       flexGrow: 1,
       padding: theme.spacing(3),
@@ -70,23 +33,228 @@ import DeleteIcon from '@material-ui/icons/Delete';
     },
     button: {
       marginTop: theme.spacing(3),
-      marginBottom: theme.spacing(3),
     },
     btnedit:{
-      marginRight: theme.spacing(2),
-      marginLeft: theme.spacing(2),
+      margin: theme.spacing(2, 2, 1, 0),
+      width: '80%'
+    },
+    btnRequests:{
+      margin: theme.spacing(2, 2, 1, 0),
       backgroundColor: theme.palette.success.main,
+      color: theme.palette.common.white,
+      width: '80%'
     },
     btndelete:{
-      marginRight: theme.spacing(2),
-      marginLeft: theme.spacing(2),
+      margin: theme.spacing(1, 2, 2, 0),
       backgroundColor: theme.palette.error.dark,
       color: theme.palette.common.white,
+      width: '80%'
+    },
+    center: {
+      textAlign: '-webkit-center'
+    },
+    crdTeam:{
+      margin: theme.spacing(2, 0),
+      color: 'white',
+      backgroundImage: 'url('+ 'https://lolstatic-a.akamaihd.net/frontpage/apps/prod/clash-2018/es_MX/a46e742ae82f9d4f9db8e34ba57873e513e727b7/assets/static/img/backgrounds/team-creation-bg.jpg' +')',
+      backgroundPositionY: 'center',
+      backgroundBlendMode: 'hard-light',
+      display: 'flex',
+      alignItems: 'center',
+    },
+    confAvatar:{
+      margin: theme.spacing(2),
+    },
+    large:{
+      width: theme.spacing(12),
+      height: theme.spacing(12),
+    },
+    confInfo:{
+      margin: theme.spacing(4, 2),
+      alignSelf: 'baseline',
+      textAlign: 'left',
+      width: theme.spacing(50)
+    },
+    confInfoLeagues:{
+      margin: theme.spacing(2),
+      alignSelf: 'baseline',
+      textAlign: 'left',
+      width: theme.spacing(25)
+    },
+    confInfoPlayers:{
+      margin: theme.spacing(2),
+      alignSelf: 'baseline',
+      textAlign: 'left',
+      width: theme.spacing(35)
+    },
+    confUuid:{
+      fontSize: '11px',
+      fontStyle: 'italic',
+      marginTop: theme.spacing(2), 
+    },
+    confDesc:{
+      fontSize: '15px',
+    },
+    confBtns:{
+      margin: theme.spacing(2)
+    },
+    details:{
+      alignSelf: 'baseline',
+    },
+    confBold: {
+      fontWeight: 'bold',
+    }
+  }));
+
+  const useStyleNoData = makeStyles((theme)=> ({
+    extraLarge:{
+        width: theme.spacing(25),
+        height: theme.spacing(25),
+        marginRight: theme.spacing(5),
+    },
+    content:{
+        marginTop: theme.spacing(10),
+        marginBottom: theme.spacing(20),
+        display: 'inline-block',
+        textAlign: '-webkit-center',
+        opacity: '0.7'
+    }
+  }));
+
+  const useStylesPB = makeStyles((theme) => ({
+    barProgress: {
+      textAlign: 'center',
+      margin: theme.spacing(2),
     },
   }));
- 
-const TeamsMain = () => {
+
+  const NoData = (params) => {
+    const classes = useStyleNoData();
+
+    return (
+        <div className={classes.content}>
+            <Avatar alt="Remy Sharp" src={Poro} className={classes.extraLarge}/>
+            <Typography variant="subtitle1">{params.texto}</Typography>
+        </div>
+    );
+  }
+
+  const Team = props => {
     const classes = useStyles();
+
+    return (
+      <Card className={classes.crdTeam}>
+        <div className={classes.confAvatar}>
+          <Avatar variant="square" src={props.icon} className={classes.large} />
+        </div>
+        <div className={classes.confInfo}>
+          <Typography variant="h6">{props.name.toUpperCase()}</Typography>
+          <Typography variant="body2" className={classes.confDesc}>{props.desc}</Typography>
+          <Typography variant="body2" className={classes.confUuid}>{props.uuid}</Typography>
+        </div>
+        <div className={classes.confInfoLeagues}>
+          <Typography variant="body2" className={classes.confBold}>LIGAS</Typography>
+          <div className={classes.details}>
+            {
+              props.leagues.map((liga)=>(
+                <li>{liga}</li>
+              ))
+            }
+          </div>    
+        </div>
+        <div className={classes.confInfoPlayers}>
+          <Typography variant="body2" className={classes.confBold}>JUGADORES</Typography>
+          <div className={classes.details}>
+            {
+              props.players.map((player)=>(
+                <Typography variant="body2">{player.nickname + ' - ' + player.role.toUpperCase()}</Typography>
+              ))
+            }
+          </div>    
+        </div>
+        <div className={classes.confBtns}>
+          <Button variant="contained" color="default" className={classes.btnRequests} size="medium" startIcon={<ContactMailIcon />} onClick={props.requests}>Solicitudes</Button>
+          <Button variant="contained" color="secondary" className={classes.btnedit} size="medium" startIcon={<CreateIcon />} onClick={props.edit}>Editar</Button>
+          <Button variant="contained" color="default" className={classes.btndelete} size="medium" startIcon={<DeleteIcon />} onClick={props.delete}>Eliminar</Button>
+        </div>               
+      </Card>  
+    );
+  }
+
+  const CustomCircularProgress = () => 
+  {
+    const classes = useStylesPB();
+
+    return(
+      <div className={classes.barProgress}>
+        <CircularProgress color="secondary" size="80px"/>
+        <div>
+          <span>Procesando solicitud</span>
+        </div>
+      </div>
+    );
+  };
+
+  const TeamsMain = () => {
+    const classes = useStyles();
+    let match = useRouteMatch();
+    let history = useHistory();
+    const [state, setState]= useState({items: []});
+    const [bodyData, setBodyData] = useState('');
+
+    useEffect(()=>{
+      setBodyData(<CustomCircularProgress/>);
+
+      GetTeamClashByOwner(localStorage.getItem('summonerName'))
+      .then( data =>{
+        if(data.data.items.length > 0){
+          state.items = data.data.items;
+          setBodyData(null);
+        }
+        else{
+          setBodyData(<NoData texto={'Aún no cuentas con equipos'}/>);
+        }
+      })
+      .catch( err => {
+        console.error(err);
+        setBodyData(<NoData texto={'Ha ocurrido un error al cargar los datos'} />);
+      });
+
+    }, [])
+
+
+    const deleteEvent = (index) => {
+      
+      DeleteTeamClash(state.items[index].uuid)
+      .then( data => {
+        if(data.status === 200){
+          const copyItems = Object.assign([], state.items);
+          copyItems.splice(index, 1);
+          setState({items: copyItems});
+
+          if(copyItems.length === 0){
+            setBodyData(<NoData texto={'Aún no cuentas con equipos'}/>);
+          }
+        }else{
+          console.log(data);
+        }
+      })
+      .catch( err => {
+        console.log(err);
+      });
+    }
+
+    const editEvent = (index) => {
+      var id = state.items[index].uuid;
+
+      history.push(`${match.url}/${id}`)
+    }
+
+    const requestsEvent = (index) => {
+      var id = state.items[index].uuid;
+
+      history.push(`${match.url}/requests/${id}`)
+    }
 
     return (
       <Container fixed>
@@ -94,42 +262,31 @@ const TeamsMain = () => {
           <Typography variant="h5">MIS EQUIPOS</Typography>
           <Button 
             variant="contained" 
-            size="large"
-            color="primary" 
+            size='large'
+            color='primary' 
             className={classes.button}
             startIcon={<AddIcon />}
+            onClick={() => { history.push(`${match.url}/new`)}}
           >
           CREAR
           </Button>
-
-          <TableContainer  className={classes.tablecontainer} component={Paper}>
-              <Table color="primary-ligth" className={classes.table} aria-label="customized table">
-                <TableHead>
-                  <TableRow>
-                    <StyledTableCell align="center">Equipo</StyledTableCell>
-                    <StyledTableCell align="center">Jornada</StyledTableCell>
-                    <StyledTableCell align="center">Vigencia</StyledTableCell>
-                    <StyledTableCell align="center">Acciones</StyledTableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {rows.map((row) => (
-                    <StyledTableRow key={row.team}>
-                      <StyledTableCell align="center">{row.team}</StyledTableCell>
-                      <StyledTableCell align="center">{row.journey}</StyledTableCell>
-                      <StyledTableCell align="center">{row.validity}</StyledTableCell>
-                      <StyledTableCell align="center">
-                        <Button variant="contained" color="success" className={classes.btnedit}>Editar</Button>
-                        <Button variant="contained" color="error" className={classes.btndelete} size="" startIcon={<DeleteIcon />}>Eliminar</Button>
-                      </StyledTableCell>
-                    </StyledTableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>      
+          <div className={classes.center}>
+            {
+              state.items.map((row, index)=>(
+                <Team key={row.uuid} id={row.uuid} name={row.nombre} 
+                      icon={row.icono} desc={row.descripcion} leagues={row.ligas} 
+                      players={row.players} delete={deleteEvent.bind(this, index)}
+                      requests={requestsEvent.bind(this, index)}
+                      edit={editEvent.bind(this, index)}/>
+              ))
+            }
+            {
+              bodyData
+            } 
+          </div>     
         </Card>       
-      </Container>   
+      </Container>  
     );
-};
+  };
 
 export default TeamsMain;

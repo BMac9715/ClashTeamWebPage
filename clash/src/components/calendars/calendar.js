@@ -6,8 +6,6 @@ import Typography from '@material-ui/core/Typography';
 import Card from '@material-ui/core/Card';
 import Cup from '../../assets/images/cup.jpg';
 import Poro from '../../assets/images/poro.png';
-import Button from '@material-ui/core/Button';
-import AddIcon from '@material-ui/icons/Add';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
@@ -169,6 +167,8 @@ const Calendar = () => {
         })
         .catch( err => {
             console.error(err);
+            setSpinner(null);
+            setBody(<NoData />);
         });
     }, []);
 

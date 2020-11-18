@@ -18,9 +18,13 @@ import KeyboardReturnIcon from '@material-ui/icons/KeyboardReturn';
 import CalendarTodayIcon from '@material-ui/icons/CalendarToday';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TeamsMain from '../teams/teamsmain.js';
+import EditTeam from '../teams/updateteam.js';
+import NewTeam from '../teams/newteam.js';
 import Profile from '../profile/profile.js';
+import ProfileSec from '../profile/profile-sec.js';
 import Calendar from '../calendars/calendar.js';
 import Search from '../teams/search.js';
+import Requests from '../requests/requests.js';
 import { Logout } from '../../services/auth.service';
 
 const drawerWidth = 240;
@@ -154,7 +158,7 @@ const SideNavBar = props => {
         </List>
         <Divider />
         <List>
-          {["Cerra Sesión"].map((text, index) => (
+          {["Cerrar Sesión"].map((text, index) => (
             <ListItem button key={text} onClick={UserLogout}>
               <ListItemIcon>
                 {index % 2 === 0 ? <KeyboardReturnIcon /> : <SearchIcon />}
@@ -174,6 +178,10 @@ const SideNavBar = props => {
         <Route exact path={`${match.path}/teams`} component={TeamsMain}></Route>
         <Route exact path={`${match.path}/search`} component={Search}></Route>
         <Route exact path={`${match.path}/calendars`} component={Calendar}></Route>
+        <Route exact path={`${match.path}/teams/new`} component={NewTeam}></Route>
+        <Route exact path={`${match.path}/teams/:id`} component={EditTeam}></Route>
+        <Route exact path={`${match.path}/teams/requests/:id`} component={Requests}></Route>
+        <Route exact path={`${match.path}/teams/requests/:id/:nickname`} component={ProfileSec}></Route>
       </Switch>    
     </div>
   );

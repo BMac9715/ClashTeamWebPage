@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { TranslateText } from '../services/clash.service';
 
-export function GetCalendars(){
+export const GetCalendars = () => {
 
     return new Promise((resolve, reject) => {
         axios.get(process.env.REACT_APP_URL_PLATFORM_RIOT_API 
@@ -49,7 +49,7 @@ export function GetCalendars(){
     });
 }
 
-export function GetGeneralInformation(summonername){
+export const GetGeneralInformation = (summonername) => {
     return new Promise((resolve, reject) => {
         axios.get(process.env.REACT_APP_URL_PLATFORM_RIOT_API
             + '/lol/summoner/v4/summoners/by-name/'
@@ -69,7 +69,7 @@ export function GetGeneralInformation(summonername){
     });
 };
 
-export function GetChampionsPool(summoner_id){
+export const GetChampionsPool = (summoner_id) => {
    return new Promise((resolve, reject) => {
         axios.get(process.env.REACT_APP_URL_PLATFORM_RIOT_API
             + '/lol/champion-mastery/v4/champion-masteries/by-summoner/'
@@ -89,7 +89,7 @@ export function GetChampionsPool(summoner_id){
     });
 };
 
-export function GetRankedsInformation(summoner_id){
+export const GetRankedsInformation = (summoner_id) => {
     return new Promise((resolve, reject) => {
         axios.get(process.env.REACT_APP_URL_PLATFORM_RIOT_API
             + '/lol/league/v4/entries/by-summoner/'
@@ -104,7 +104,7 @@ export function GetRankedsInformation(summoner_id){
     });
 };
 
-export function GetChampionInfo (champs) {
+export const GetChampionInfo = (champs) => {
 
    return new Promise((resolve, reject) => {
     axios.get(process.env.REACT_APP_DATA_DRAGON_CHAMPS_INFO)
@@ -134,7 +134,7 @@ export function GetChampionInfo (champs) {
 
 };
 
-export function GetCompleteProfile(summonername){
+export const GetCompleteProfile = (summonername) => {
     
     return new Promise((resolve, reject) => {
         GetGeneralInformation(summonername)   
@@ -172,7 +172,7 @@ export function GetCompleteProfile(summonername){
                         /* 2. Rankeds Information */
                         dataRnk.forEach(element =>{
                             prof.ranks.push({
-                                'queueType': element.queueType,
+                                'queueType': element.queueType.replaceAll('_', ' '),
                                 'tier': element.tier,
                                 'rank': element.tier + ' ' + element.rank,
                                 'wins': element.wins,

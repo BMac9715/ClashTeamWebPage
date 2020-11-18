@@ -23,7 +23,7 @@ export const SignInCognito = (email, password) => {
     return new Promise((resolve, reject)=>{
         user.authenticateUser(authDetails, {
             onSuccess: data => {
-                localStorage.setItem('summonerName', data.idToken.payload.nickname);
+                localStorage.setItem('summonerName', data.idToken.payload.nickname.toUpperCase());
                 localStorage.setItem('accessToken', data.accessToken.jwtToken);
                 localStorage.setItem('refreshToken', data.refreshToken.token);
                 localStorage.setItem('expiration', data.idToken.payload.exp.toString() + '000');

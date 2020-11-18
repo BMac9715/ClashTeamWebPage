@@ -11,11 +11,11 @@ import Divider from "@material-ui/core/Divider";
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { useHistory } from "react-router-dom";
 import { green } from '@material-ui/core/colors';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
-import { CreateTeamClash } from '../../services/clash.service';
+import Poro from '../../assets/images/poro.png';
+import { GetTeamClash, UpdateTeamClash } from '../../services/clash.service';
+import { useParams } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -129,6 +129,21 @@ const useStylesPB = makeStyles((theme) => ({
   },
 }));
 
+const useStyleNoData = makeStyles((theme)=> ({
+    extraLarge:{
+        width: theme.spacing(25),
+        height: theme.spacing(25),
+        marginRight: theme.spacing(5),
+    },
+    content:{
+        marginTop: theme.spacing(10),
+        marginBottom: theme.spacing(20),
+        display: 'inline-block',
+        textAlign: '-webkit-center',
+        opacity: '0.7'
+    }
+  }));
+
 const GreenCheckbox = withStyles({
   root: {
     color: green[400],
@@ -140,13 +155,13 @@ const GreenCheckbox = withStyles({
   disabled: {},
 })((props) => <Checkbox color="default" {...props} />);
 
-const CustomCircularProgress = () => 
+const CustomCircularProgress = params => 
 {
   const classes = useStylesPB();
 
   return(
     <div className={classes.barProgress}>
-      <CircularProgress color="secondary" size="40px"/>
+      <CircularProgress color="secondary" size={params.size}/>
       <div>
         <span>Procesando solicitud</span>
       </div>
@@ -154,8 +169,15 @@ const CustomCircularProgress = () =>
   );
 };
 
-const getRandomArbitrary = (min, max) => {
-  return Math.floor(Math.random() * (max - min) + min);
+const NoData = (params) => {
+    const classes = useStyleNoData();
+
+    return (
+        <div className={classes.content}>
+            <Avatar alt="Remy Sharp" src={Poro} className={classes.extraLarge}/>
+            <Typography variant="subtitle1">{params.texto}</Typography>
+        </div>
+    );
 };
 
 const getInitStates = () => {
@@ -165,7 +187,6 @@ const getInitStates = () => {
 
   var elements = {};
   elements.checkedT = true;
-  elements.rol = '';
   elements.teamName = '';
   elements.description = '';
   elements.discord = '';
@@ -177,16 +198,44 @@ const getInitStates = () => {
   return elements;
 };
 
-const NewTeam = () => {
+const EditTeam = () => {
   const classes = useStyles();
   const [state, setState] = useState(getInitStates());
   const [message, setMessage] = useState('');
   const [icono, setIcon] = useState('');
   const [ligas, setLigas] = useState([]);
+  const [team, setTeam] = useState({team:''});
   let history = useHistory();
+  const { id } = useParams();
 
   useEffect(() => {
-    setIcon(process.env.REACT_APP_ICONS_CLASH_URL +'team' + getRandomArbitrary(1,17).toString() + '.svg');
+    setMessage(<CustomCircularProgress size="80px"/>);
+
+    GetTeamClash(id)
+    .then( data => {
+        if(data.status === 200){
+            setTeam({team: data.data.items[0]});
+            setIcon(data.data.items[0].icono);
+            state.teamName= data.data.items[0].nombre;
+            state.description= data.data.items[0].descripcion;
+            state.discord= data.data.items[0].discord;
+            state.checkedT= false;
+
+            data.data.items[0].ligas.forEach(liga => {
+                state['checked_'+liga] = true;
+            });
+
+            setMessage (null);
+        }else{
+            console.log(data);
+            setMessage(<NoData texto="No se ha encontrado el equipo" />)
+        }
+    })
+    .catch( err => {
+        console.error(err);
+        setMessage(<NoData texto="No se ha encontrado el equipo" />)
+    })
+
     setLigas(['Hierro', 'Bronze', 'Plata', 'Oro', 
     'Platino', 'Diamante', 'Master', 'GrandMaster', 
     'Challenger']);
@@ -209,58 +258,39 @@ const NewTeam = () => {
     return res;
   };
 
-  const SendTeam = event => {
+  const UpdateTeam = event => {
     event.preventDefault();
   
-    setMessage(<CustomCircularProgress/>);
+    setMessage(<CustomCircularProgress size="40px"/>);
+    
+    team.team.nombre = state.teamName;
+    team.team.descripcion = state.description;
+    team.team.ligas = getLigas();
+    team.team.discord = state.discord;
+    
+    console.log(team);
 
-    var team = {
-      'team':{
-        'owner': localStorage.getItem('summonerName'),
-        'region': 'LAN',
-        'nombre': state.teamName,
-        'descripcion': state.description,
-        'icono': icono,
-        'ligas': getLigas(),
-        'discord': state.discord,
-        'players':[{
-          'nickname': localStorage.getItem('summonerName'),
-          'role': state.rol
-        }]
-      }
-    };
-
-    CreateTeamClash(team)
-    .then(data =>{
-      if(data.status === 201){
+    UpdateTeamClash(team.team.uuid, team)
+    .then(() =>{
+        setMessage(null);
         setMessage(
-          <div className={classes.success}>
-            <span>Se ha creado el equipo correctamente</span>
-          </div>
+            <div className={classes.success}>
+              <span>Se han actualizado los datos correctamente</span>
+            </div>
         );
-
         setTimeout(() => {
           setMessage(null);
           clearInterval(this);
           history.goBack();
         }, 2000); 
-      }
-      else{
-        console.log(data);
+    })
+    .catch(err =>{
+        console.error(err);
         setMessage(
           <div className={classes.error}>
-            <span>Ha ocurrido un error, vuelve a intentarlo</span>
+            <span>{err}</span>
           </div>
         );
-      }
-    })
-    .catch(err => {
-      console.error(err);
-      setMessage(
-        <div className={classes.error}>
-          <span>{err}</span>
-        </div>
-      );
     });
   };
 
@@ -280,7 +310,7 @@ const NewTeam = () => {
     <Container fixed>
       <Card className={classes.crdNewTeam} >
       <Typography variant="h5" className={classes.mrgTitle}>
-        NUEVO EQUIPO
+        EDITAR EQUIPO
       </Typography>
       <Typography variant="subtitle1" className={classes.mrgSubTitle}>
         Icono asignado:
@@ -292,7 +322,7 @@ const NewTeam = () => {
       <Typography variant="subtitle1" className={classes.mrgSubTitle}>
         Completa los siguientes datos:
       </Typography>
-      <form className={classes.form} noValidate onSubmit={SendTeam}>
+      <form className={classes.form} noValidate onSubmit={UpdateTeam}>
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <TextField
@@ -302,6 +332,7 @@ const NewTeam = () => {
               fullWidth
               label="Nombre del equipo"
               autoFocus
+              value={state.teamName}
               onChange={handleChange}
             />
           </Grid>
@@ -312,6 +343,7 @@ const NewTeam = () => {
               fullWidth
               label="Descripción sobre el equipo"
               name="description"
+              value={state.description}
               multiline
               onChange={handleChange}
             />
@@ -322,6 +354,7 @@ const NewTeam = () => {
               fullWidth
               label="Servidor de Discord"
               name="discord"
+              value={state.discord}
               onChange={handleChange}
             />
           </Grid>
@@ -340,29 +373,6 @@ const NewTeam = () => {
                 label={name}
               />
             ))}
-          </Grid>
-          <Grid item xs={12}>
-            <Divider /> 
-            <Typography variant="subtitle1" className={classes.mrgSubTitle}>
-              Elige tu rol:
-            </Typography>
-            <FormControl className={classes.formControl}>
-              <Select
-                native
-                value={state.rol}
-                onChange={handleChange}
-                inputProps={{
-                  name: 'rol'
-                }}
-              >
-                <option aria-label="None" value="" />
-                <option value={'Superior'}>Superior</option>
-                <option value={'Jungla'}>Jungla</option>
-                <option value={'Central'}>Central</option>
-                <option value={'Inferior'}>Inferior</option>
-                <option value={'Soporte'}>Soporte</option>
-              </Select>
-            </FormControl>
           </Grid>
         </Grid>
         {message}
@@ -390,4 +400,4 @@ const NewTeam = () => {
   );
 };
 
-export default NewTeam;
+export default EditTeam;
