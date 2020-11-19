@@ -15,7 +15,7 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
-import { CreateTeamClash } from '../../services/clash.service';
+import { CreateTeamClash, GetLeaguesFromRedis } from '../../services/clash.service';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -187,9 +187,21 @@ const NewTeam = () => {
 
   useEffect(() => {
     setIcon(process.env.REACT_APP_ICONS_CLASH_URL +'team' + getRandomArbitrary(1,17).toString() + '.svg');
-    setLigas(['Hierro', 'Bronze', 'Plata', 'Oro', 
-    'Platino', 'Diamante', 'Master', 'GrandMaster', 
-    'Challenger']);
+    
+    GetLeaguesFromRedis()
+    .then(data => {
+        let objs = Object.values(data);
+        let leagues = [];
+        
+        objs.forEach(item => {
+          leagues.push(item.liga);
+        });
+
+        setLigas(leagues);
+    })
+    .catch(err =>{
+      console.error(err);
+    });
   }, []);
 
   const getLigas = () => {

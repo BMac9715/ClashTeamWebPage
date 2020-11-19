@@ -6,17 +6,9 @@ import Typography from '@material-ui/core/Typography';
 import Card from '@material-ui/core/Card';
 import Divider from '@material-ui/core/Divider';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import IRON from '../../assets/images/Emblem_Iron.png';
-import BRONZE from '../../assets/images/Emblem_Bronze.png';
-import SILVER from '../../assets/images/Emblem_Silver.png';
-import GOLD from '../../assets/images/Emblem_Gold.png';
-import PLATINUM from '../../assets/images/Emblem_Platinum.png';
-import DIAMOND from '../../assets/images/Emblem_Diamond.png';
-import MASTER from '../../assets/images/Emblem_Master.png';
-import GRANDMASTER from '../../assets/images/Emblem_Grandmaster.png'
-import CHALLENGER from '../../assets/images/Emblem_Challenger.png';
 import Poro from '../../assets/images/poro.png';
 import { GetCompleteProfile } from '../../services/riot.service';
+import { GetLeaguesFromRedis } from '../../services/clash.service';
 
 const useStyles = makeStyles((theme) => ({
     large: {
@@ -161,38 +153,24 @@ const Champ = (params) => {
     );
 }
 
-const Emblems = (tier) => {
-    switch(tier){
-        case "IRON":
-            return IRON;
-        case "BRONZE":
-            return BRONZE;
-        case "SILVER": 
-            return SILVER;
-        case "GOLD":
-            return GOLD;
-        case "PLATINUM":
-            return PLATINUM;
-        case "DIAMOND":
-            return DIAMOND;
-        case "MASTER":
-            return MASTER;
-        case "GRANDMASTER":
-            return GRANDMASTER;
-        case "CHALLENGER":
-            return CHALLENGER;
-        default:
-            return null;
-    }
-}
-
 const Ranked = (params) => {
     const classes = useStyleRanked();
+    const [emblema, setEmblema] = useState('');
+
+    useEffect(()=>{
+        GetLeaguesFromRedis()
+        .then(data => {
+            setEmblema(data[params.ranked.tier].icono);
+        })
+        .catch(err => {
+            console.error(err);
+        });
+    }, []);
 
     return (
     <div className={classes.crdRank}>
         <Typography variant="h6">{params.ranked.queueType}</Typography>
-        <Avatar variant="square" src={Emblems(params.ranked.tier)} className={classes.large} />
+        <Avatar variant="square" src={emblema} className={classes.large} />
         <div className={classes.rankInfo}>
             <Typography variant="h6">{params.ranked.rank}</Typography>
             <Typography variant="subtitle1">{params.ranked.points} pts</Typography>
@@ -210,7 +188,7 @@ const ProfileSummoner = (params) => {
     return ( 
         <div className={classes.content}>
             <div className={classes.prfHeader}>
-                <Avatar alt="Remy Sharp" src={params.params.profileIcon} className={classes.large} />
+                <Avatar src={params.params.profileIcon} className={classes.large} />
                 <div className={classes.left}>
                     <Typography variant="h4">{params.params.nickname}</Typography>
                     <Typography variant="subtitle1">{params.params.server}</Typography>

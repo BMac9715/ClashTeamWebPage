@@ -242,3 +242,25 @@ export const GetRequestsTeam = (id_team) => {
         });
     });
 }
+
+export const GetLeaguesFromRedis = () => {
+
+    return new Promise((resolve, reject) =>{
+        axios.get(process.env.REACT_APP_URL_CLASH_API + '/leagues',
+        {
+            'headers' :{
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Authorization, Accept', 
+                'Authorization': process.env.REACT_APP_CLASH_API_KEY 
+            }
+        }
+        )
+        .then( data => {
+            resolve(data.data.data);
+        })
+        .catch( err => {
+            reject(err);
+        });
+    });
+}

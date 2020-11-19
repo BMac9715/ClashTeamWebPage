@@ -17,6 +17,7 @@ import GRANDMASTER from '../../assets/images/Emblem_Grandmaster.png'
 import CHALLENGER from '../../assets/images/Emblem_Challenger.png';
 import Poro from '../../assets/images/poro.png';
 import { GetCompleteProfile } from '../../services/riot.service';
+import { GetLeaguesFromRedis } from '../../services/clash.service';
 import { useParams } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
@@ -162,38 +163,24 @@ const Champ = (params) => {
     );
 }
 
-const Emblems = (tier) => {
-    switch(tier){
-        case "IRON":
-            return IRON;
-        case "BRONZE":
-            return BRONZE;
-        case "SILVER": 
-            return SILVER;
-        case "GOLD":
-            return GOLD;
-        case "PLATINUM":
-            return PLATINUM;
-        case "DIAMOND":
-            return DIAMOND;
-        case "MASTER":
-            return MASTER;
-        case "GRANDMASTER":
-            return GRANDMASTER;
-        case "CHALLENGER":
-            return CHALLENGER;
-        default:
-            return null;
-    }
-}
-
 const Ranked = (params) => {
     const classes = useStyleRanked();
+    const [emblema, setEmblema] = useState('');
+
+    useEffect(()=>{
+        GetLeaguesFromRedis()
+        .then(data => {
+            setEmblema(data[params.ranked.tier].icono);
+        })
+        .catch(err => {
+            console.error(err);
+        });
+    }, []);
 
     return (
     <div className={classes.crdRank}>
         <Typography variant="h6">{params.ranked.queueType}</Typography>
-        <Avatar variant="square" src={Emblems(params.ranked.tier)} className={classes.large} />
+        <Avatar variant="square" src={emblema} className={classes.large} />
         <div className={classes.rankInfo}>
             <Typography variant="h6">{params.ranked.rank}</Typography>
             <Typography variant="subtitle1">{params.ranked.points} pts</Typography>

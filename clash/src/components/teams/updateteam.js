@@ -14,7 +14,7 @@ import { green } from '@material-ui/core/colors';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import Poro from '../../assets/images/poro.png';
-import { GetTeamClash, UpdateTeamClash } from '../../services/clash.service';
+import { GetTeamClash, UpdateTeamClash, GetLeaguesFromRedis } from '../../services/clash.service';
 import { useParams } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
@@ -211,34 +211,43 @@ const EditTeam = () => {
   useEffect(() => {
     setMessage(<CustomCircularProgress size="80px"/>);
 
-    GetTeamClash(id)
-    .then( data => {
-        if(data.status === 200){
-            setTeam({team: data.data.items[0]});
-            setIcon(data.data.items[0].icono);
-            state.teamName= data.data.items[0].nombre;
-            state.description= data.data.items[0].descripcion;
-            state.discord= data.data.items[0].discord;
-            state.checkedT= false;
-
-            data.data.items[0].ligas.forEach(liga => {
-                state['checked_'+liga] = true;
-            });
-
-            setMessage (null);
-        }else{
-            console.log(data);
+    GetLeaguesFromRedis()
+    .then(data => {
+        let objs = Object.values(data);
+        let leagues = [];
+        
+        objs.forEach(item => {
+          leagues.push(item.liga);
+        });
+        setLigas(leagues);
+        GetTeamClash(id)
+        .then( data2 => {
+            if(data2.status === 200){
+                setTeam({team: data2.data.items[0]});
+                setIcon(data2.data.items[0].icono);
+                state.teamName= data2.data.items[0].nombre;
+                state.description= data2.data.items[0].descripcion;
+                state.discord= data2.data.items[0].discord;
+                state.checkedT= false;
+    
+                data2.data.items[0].ligas.forEach(liga => {
+                    state['checked_'+liga] = true;
+                });
+    
+                setMessage (null);
+            }else{
+                console.log(data2);
+                setMessage(<NoData texto="No se ha encontrado el equipo" />)
+            }
+        })
+        .catch( err => {
+            console.error(err);
             setMessage(<NoData texto="No se ha encontrado el equipo" />)
-        }
+        });
     })
-    .catch( err => {
-        console.error(err);
-        setMessage(<NoData texto="No se ha encontrado el equipo" />)
-    })
-
-    setLigas(['Hierro', 'Bronze', 'Plata', 'Oro', 
-    'Platino', 'Diamante', 'Master', 'GrandMaster', 
-    'Challenger']);
+    .catch(err =>{
+      console.error(err);
+    });
   }, []);
 
   const getLigas = () => {

@@ -60,6 +60,7 @@ const useStyles = makeStyles((theme) => ({
     flexShrink: 0,
     whiteSpace: "nowrap",
     position: "inherit !important",
+    minHeight: '87vh',
   },
   drawerOpen: {
     width: drawerWidth,
@@ -94,6 +95,29 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(3),
   },
 }));
+
+const useStylesFooter = makeStyles((theme) => ({
+  footer: {
+    display: "flex",
+    marginTop: '1rem',
+    padding: '1rem',
+    backgrounColor: 'rgb(235, 195, 64)',
+    position: 'fixed',
+    bottom: 0,
+    left:0,
+    width: '100%'
+  },
+}));
+
+const Footer = () => {
+  const classes = useStylesFooter();
+
+  return (
+    <div className={classes.footer}>
+      <p>This is some content in sticky footer</p>
+    </div>
+    );
+};
 
 const SideNavBar = props => {
   const classes = useStyles();
@@ -167,7 +191,7 @@ const SideNavBar = props => {
             </ListItem>
           ))}
         </List>
-      </Drawer>
+      </Drawer> 
       <Switch>
         <Route exact path={`${match.path}/`} render={()=>{
               return(
@@ -182,7 +206,7 @@ const SideNavBar = props => {
         <Route exact path={`${match.path}/teams/:id`} component={EditTeam}></Route>
         <Route exact path={`${match.path}/teams/requests/:id`} component={Requests}></Route>
         <Route exact path={`${match.path}/teams/requests/:id/:nickname`} component={ProfileSec}></Route>
-      </Switch>    
+      </Switch>  
     </div>
   );
 };
