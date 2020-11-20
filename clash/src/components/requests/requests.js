@@ -47,6 +47,20 @@ const useStyles = makeStyles((theme) => ({
     lstCust:{
         display: 'inline-grid',
     },
+    success: {
+        backgroundColor: "#ace0ac",
+        color: "#348c34",
+        textAlign: 'center',
+        padding: theme.spacing(2),
+        marginTop: theme.spacing(2)
+    },
+    error: {
+      backgroundColor: "#ef9a9a",
+      color: "brown",
+      textAlign: 'center',
+      padding: theme.spacing(2),
+      marginTop: theme.spacing(2)
+    },
   }));
 
 const useStylesRequest = makeStyles((theme) => ({
@@ -171,7 +185,6 @@ const Requests = () => {
 
         GetRequestsTeam(id)
         .then( data => {
-            console.log(data);
             if(data.data.items.length > 0){
                 state.teamName = data.data.items[0].teamName.toUpperCase();
                 state.requests = data.data.items;
@@ -197,16 +210,33 @@ const Requests = () => {
                 const copyItems = Object.assign([], state.requests);
                 copyItems.splice(index, 1);
                 setState({requests: copyItems});
-                setSpinner(null);
-                if(copyItems.length === 0){
-                  setSpinner(<NoData />);
-                }
+
+                setSpinner(
+                    <div className={classes.success}>
+                      <span>Se ha rechazado la solicitud correctamente</span>
+                    </div>
+                );
+
+                setTimeout(()=>{
+                    setSpinner(null);
+                    if(copyItems.length === 0){
+                        setSpinner(<NoData />);
+                    }
+                }, 2000);         
             }else{
               console.log(data);
             }
         })
         .catch(err => {
             console.error(err);
+            setSpinner(
+                <div className={classes.error}>
+                  <span>ERROR: {err.message}</span>
+                </div>
+              );
+              setTimeout(()=>{
+                  setSpinner(null);
+              }, 2000);
         });
     }
 
@@ -229,14 +259,24 @@ const Requests = () => {
                 if(data2.status === 200){
                     DeleteRequestClash(request_id)
                     .then(data3 =>{
+                        console.log(data3);
                         if(data3.status === 200){
                             const copyItems = Object.assign([], state.requests);
                             copyItems.splice(index, 1);
                             setState({requests: copyItems});
-                            setSpinner(null);
-                            if(copyItems.length === 0){
-                                setSpinner(<NoData />);
-                            }
+
+                            setSpinner(
+                                <div className={classes.success}>
+                                  <span>Se ha añadido el jugador a tu equipo correctamente</span>
+                                </div>
+                            );
+                  
+                            setTimeout(()=>{
+                                setSpinner(null);
+                                if(copyItems.length === 0){
+                                    setSpinner(<NoData />);
+                                }
+                            }, 2000);
                         }else{
                             console.log(data);
                         }

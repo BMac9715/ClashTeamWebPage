@@ -333,12 +333,18 @@ const Search = () => {
         });
     };
 
+    const GetNotOwnerTeams = (elements)=>{
+      var user = localStorage.getItem('summonerName').toUpperCase();
+      return elements.filter(e => e.owner != user );
+    };
+
     useEffect(()=>{
         setBodyData(<CustomCircularProgress size="80px"/>)
         GetTeamsClash()
         .then(data => {
             if(data.data.items.length > 0){
-                state.items = data.data.items;
+                console.log(data.data.items);
+                state.items = GetNotOwnerTeams(data.data.items);
                 setBodyData(null);
             }
             else{

@@ -6,15 +6,6 @@ import Typography from '@material-ui/core/Typography';
 import Card from '@material-ui/core/Card';
 import Divider from '@material-ui/core/Divider';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import IRON from '../../assets/images/Emblem_Iron.png';
-import BRONZE from '../../assets/images/Emblem_Bronze.png';
-import SILVER from '../../assets/images/Emblem_Silver.png';
-import GOLD from '../../assets/images/Emblem_Gold.png';
-import PLATINUM from '../../assets/images/Emblem_Platinum.png';
-import DIAMOND from '../../assets/images/Emblem_Diamond.png';
-import MASTER from '../../assets/images/Emblem_Master.png';
-import GRANDMASTER from '../../assets/images/Emblem_Grandmaster.png'
-import CHALLENGER from '../../assets/images/Emblem_Challenger.png';
 import Poro from '../../assets/images/poro.png';
 import { GetCompleteProfile } from '../../services/riot.service';
 import { GetLeaguesFromRedis } from '../../services/clash.service';
