@@ -5,15 +5,19 @@ Este proyecto contiene el código fuente del frontend de la aplicación web **Cl
 # PRE-REQUISITOS
 
 Para levantar el ambiente de desarrollo correctamente es indispensable:
+
 - Node v14.8.0
 - React 16.13.1 o versiones superiores
-- Editor de código (*Sugerido:* Visual Studio Code)
+- Editor de código (_Sugerido:_ Visual Studio Code)
 
 # INSTALACIÓN
+
 Desde la carpeta raíz del proyecto, ejecutar el siguiente comando:
+
 ```javascript
 > npm install
 ```
+
 Se deben configurar las variables de ambiente, se muestra un ejemplo de las variables utilizadas en el archivo **.env-cmdrc-example**
 
 # ARQUITECTURA GENERAL
