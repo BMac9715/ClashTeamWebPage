@@ -114,7 +114,7 @@ const Copyright = () => {
           color="inherit"
           to="https://github.com/BMac9715/ClashTeamWebPage.git"
         >
-          Clash Team
+          Clash App
         </Link>{" "}
         {new Date().getFullYear()}
         {"."}

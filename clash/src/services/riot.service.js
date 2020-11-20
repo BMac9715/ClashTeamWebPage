@@ -7,9 +7,10 @@ export const GetCalendars = () => {
         axios.get(process.env.REACT_APP_URL_PLATFORM_RIOT_API 
             + '/lol/clash/v1/tournaments?api_key=' 
             + process.env.REACT_APP_RIOT_API_KEY,
-        {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Authorization, Accept',   
+        {   
+            'headers': {
+                'Origin': 'http://clash-app-bucket.s3-website.us-east-2.amazonaws.com'
+            }            
         }
         )
         .then(data => {
@@ -55,9 +56,10 @@ export const GetGeneralInformation = (summonername) => {
             + '/lol/summoner/v4/summoners/by-name/'
             + summonername.trim() 
             + '?api_key=' + process.env.REACT_APP_RIOT_API_KEY,
-            {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Authorization, Accept',   
+            {   
+                'headers': {
+                    'Origin': 'http://clash-app-bucket.s3-website.us-east-2.amazonaws.com'
+                }            
             }
         )
         .then( data => {
@@ -75,10 +77,11 @@ export const GetChampionsPool = (summoner_id) => {
             + '/lol/champion-mastery/v4/champion-masteries/by-summoner/'
             + summoner_id
             + '?api_key=' + process.env.REACT_APP_RIOT_API_KEY,
-            {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Authorization, Accept',   
-            } 
+            {   
+                'headers': {
+                    'Origin': 'http://clash-app-bucket.s3-website.us-east-2.amazonaws.com'
+                }            
+            }
         )
         .then( data => {
             resolve(data.data);
@@ -94,7 +97,12 @@ export const GetRankedsInformation = (summoner_id) => {
         axios.get(process.env.REACT_APP_URL_PLATFORM_RIOT_API
             + '/lol/league/v4/entries/by-summoner/'
             + summoner_id 
-            + '?api_key=' + process.env.REACT_APP_RIOT_API_KEY)
+            + '?api_key=' + process.env.REACT_APP_RIOT_API_KEY,
+            {   
+                'headers': {
+                    'Origin': 'http://clash-app-bucket.s3-website.us-east-2.amazonaws.com'
+                }            
+            })
         .then( data => {
             resolve(data.data);
         })
@@ -107,7 +115,12 @@ export const GetRankedsInformation = (summoner_id) => {
 export const GetChampionInfo = (champs) => {
 
    return new Promise((resolve, reject) => {
-    axios.get(process.env.REACT_APP_DATA_DRAGON_CHAMPS_INFO)
+    axios.get(process.env.REACT_APP_DATA_DRAGON_CHAMPS_INFO,
+        {   
+            'headers': {
+                'Origin': 'http://clash-app-bucket.s3-website.us-east-2.amazonaws.com'
+            }            
+        })
     .then( data => {
         var pool = Object.values(data.data.data);
         var info = [];
